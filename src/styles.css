@@ -61,6 +61,11 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+@theme inline {
+  --color-card-elevated: var(--card-elevated);
+  --color-primary-glow: var(--primary-glow);
+}
+
 :root {
   --radius: 1rem;
   /* SkillFlow dark theme */
