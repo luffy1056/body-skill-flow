@@ -39,8 +39,10 @@ const recentSessions = [
 ];
 
 function WorkoutsPage() {
-  const today = weekPlan.find((d) => d.today);
-  const todaySkill = today?.skill ? freeSkills.find((s) => s.slug === today.skill) : undefined;
+  const todayEntry = weekPlan.find((d) => d.today);
+  const todaySkill =
+    todayEntry?.skill ? freeSkills.find((s) => s.slug === todayEntry.skill) : undefined;
+  const todayLevel = todayEntry?.level ?? undefined;
 
   return (
     <AppShell>
@@ -58,7 +60,7 @@ function WorkoutsPage() {
       </header>
 
       {/* Today's Session */}
-      {today && todaySkill && (
+      {todayEntry && todaySkill && todayLevel !== undefined && (
         <section className="px-6">
           <div className="mb-3 flex items-center gap-2">
             <Zap className="h-4 w-4 text-primary" />
@@ -75,17 +77,17 @@ function WorkoutsPage() {
             />
             <div className="relative">
               <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
-                {today.focus} Day
+                {todayEntry.focus} Day
               </span>
               <h3 className="mt-3 text-2xl font-black text-foreground">
                 {todaySkill.name}
               </h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                Level {today.level} · {todaySkill.levels[today.level - 1]?.name}
+                Level {todayLevel} · {todaySkill.levels[todayLevel - 1]?.name}
               </p>
               <Link
                 to="/workout"
-                search={{ slug: todaySkill.slug, level: today.level }}
+                search={{ slug: todaySkill.slug, level: todayLevel }}
                 className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-4 font-bold text-primary-foreground transition-all hover:bg-primary-glow active:scale-[0.98]"
               >
                 <Play className="h-5 w-5 fill-current" />
