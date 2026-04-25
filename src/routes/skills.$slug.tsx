@@ -172,21 +172,23 @@ function SkillDetailPage() {
                   </div>
 
                   {!isLocked && !completed && (
-                    <button
-                      type="button"
+                    <Link
+                      to="/workout"
+                      search={{ slug: skill.slug, level: num }}
                       className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground transition-all hover:bg-primary-glow active:scale-[0.98]"
                     >
                       <Play className="h-4 w-4 fill-current" />
                       Start Level
-                    </button>
+                    </Link>
                   )}
                   {completed && (
-                    <button
-                      type="button"
+                    <Link
+                      to="/workout"
+                      search={{ slug: skill.slug, level: num }}
                       className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-secondary py-3 text-sm font-bold text-foreground transition-colors hover:bg-card-elevated"
                     >
                       Repeat Level
-                    </button>
+                    </Link>
                   )}
                 </div>
               </li>
