@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   LineChart,
   Line,
@@ -131,8 +131,13 @@ function getIntensityClass(intensity: number) {
 
 function ProgressPage() {
   const [selectedSkill, setSelectedSkill] = useState<string>(freeSkills[0].slug);
-  const heatmap = useMemo(() => buildHeatmap(16), []);
-  const series = useMemo(() => buildSeries(selectedSkill), [selectedSkill]);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const heatmap = useMemo(() => (mounted ? buildHeatmap(16) : []), [mounted]);
+  const series = useMemo(
+    () => (mounted ? buildSeries(selectedSkill) : []),
+    [mounted, selectedSkill],
+  );
 
   const totalSessions = heatmap.flat().filter((c) => c.intensity > 0).length;
   const totalMinutes = heatmap.flat().reduce((sum, c) => sum + c.minutes, 0);
