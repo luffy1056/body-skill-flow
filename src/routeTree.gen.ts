@@ -10,15 +10,22 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WorkoutsRouteImport } from './routes/workouts'
+import { Route as WorkoutRouteImport } from './routes/workout'
 import { Route as SkillsRouteImport } from './routes/skills'
 import { Route as ProgressRouteImport } from './routes/progress'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as WorkoutSummaryRouteImport } from './routes/workout.summary'
 import { Route as SkillsSlugRouteImport } from './routes/skills.$slug'
 
 const WorkoutsRoute = WorkoutsRouteImport.update({
   id: '/workouts',
   path: '/workouts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkoutRoute = WorkoutRouteImport.update({
+  id: '/workout',
+  path: '/workout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SkillsRoute = SkillsRouteImport.update({
@@ -41,6 +48,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WorkoutSummaryRoute = WorkoutSummaryRouteImport.update({
+  id: '/summary',
+  path: '/summary',
+  getParentRoute: () => WorkoutRoute,
+} as any)
 const SkillsSlugRoute = SkillsSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -52,16 +64,20 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/progress': typeof ProgressRoute
   '/skills': typeof SkillsRouteWithChildren
+  '/workout': typeof WorkoutRouteWithChildren
   '/workouts': typeof WorkoutsRoute
   '/skills/$slug': typeof SkillsSlugRoute
+  '/workout/summary': typeof WorkoutSummaryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/profile': typeof ProfileRoute
   '/progress': typeof ProgressRoute
   '/skills': typeof SkillsRouteWithChildren
+  '/workout': typeof WorkoutRouteWithChildren
   '/workouts': typeof WorkoutsRoute
   '/skills/$slug': typeof SkillsSlugRoute
+  '/workout/summary': typeof WorkoutSummaryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -69,8 +85,10 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/progress': typeof ProgressRoute
   '/skills': typeof SkillsRouteWithChildren
+  '/workout': typeof WorkoutRouteWithChildren
   '/workouts': typeof WorkoutsRoute
   '/skills/$slug': typeof SkillsSlugRoute
+  '/workout/summary': typeof WorkoutSummaryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -79,18 +97,30 @@ export interface FileRouteTypes {
     | '/profile'
     | '/progress'
     | '/skills'
+    | '/workout'
     | '/workouts'
     | '/skills/$slug'
+    | '/workout/summary'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/profile' | '/progress' | '/skills' | '/workouts' | '/skills/$slug'
+  to:
+    | '/'
+    | '/profile'
+    | '/progress'
+    | '/skills'
+    | '/workout'
+    | '/workouts'
+    | '/skills/$slug'
+    | '/workout/summary'
   id:
     | '__root__'
     | '/'
     | '/profile'
     | '/progress'
     | '/skills'
+    | '/workout'
     | '/workouts'
     | '/skills/$slug'
+    | '/workout/summary'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -98,6 +128,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   ProgressRoute: typeof ProgressRoute
   SkillsRoute: typeof SkillsRouteWithChildren
+  WorkoutRoute: typeof WorkoutRouteWithChildren
   WorkoutsRoute: typeof WorkoutsRoute
 }
 
@@ -108,6 +139,13 @@ declare module '@tanstack/react-router' {
       path: '/workouts'
       fullPath: '/workouts'
       preLoaderRoute: typeof WorkoutsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/workout': {
+      id: '/workout'
+      path: '/workout'
+      fullPath: '/workout'
+      preLoaderRoute: typeof WorkoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/skills': {
@@ -138,6 +176,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/workout/summary': {
+      id: '/workout/summary'
+      path: '/summary'
+      fullPath: '/workout/summary'
+      preLoaderRoute: typeof WorkoutSummaryRouteImport
+      parentRoute: typeof WorkoutRoute
+    }
     '/skills/$slug': {
       id: '/skills/$slug'
       path: '/$slug'
@@ -159,11 +204,23 @@ const SkillsRouteChildren: SkillsRouteChildren = {
 const SkillsRouteWithChildren =
   SkillsRoute._addFileChildren(SkillsRouteChildren)
 
+interface WorkoutRouteChildren {
+  WorkoutSummaryRoute: typeof WorkoutSummaryRoute
+}
+
+const WorkoutRouteChildren: WorkoutRouteChildren = {
+  WorkoutSummaryRoute: WorkoutSummaryRoute,
+}
+
+const WorkoutRouteWithChildren =
+  WorkoutRoute._addFileChildren(WorkoutRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProfileRoute: ProfileRoute,
   ProgressRoute: ProgressRoute,
   SkillsRoute: SkillsRouteWithChildren,
+  WorkoutRoute: WorkoutRouteWithChildren,
   WorkoutsRoute: WorkoutsRoute,
 }
 export const routeTree = rootRouteImport

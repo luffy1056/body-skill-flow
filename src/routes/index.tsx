@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Flame, Play, Quote, Zap } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { SkillCard, type Skill } from "@/components/SkillCard";
@@ -117,13 +117,14 @@ function HomePage() {
               <Stat label="Reps" value="6" />
               <Stat label="Rest" value="90s" />
             </div>
-            <button
-              type="button"
+            <Link
+              to="/workout"
+              search={{ slug: "muscle-up", level: 5 }}
               className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-4 font-bold text-primary-foreground shadow-[var(--shadow-glow)] transition-all hover:bg-primary-glow active:scale-[0.98]"
             >
               <Play className="h-5 w-5 fill-current" />
               Start Workout
-            </button>
+            </Link>
           </div>
         </article>
       </section>

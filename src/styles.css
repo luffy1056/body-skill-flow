@@ -156,3 +156,24 @@
     color: var(--color-foreground);
   }
 }
+
+@layer utilities {
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 0 0 oklch(0.82 0.22 148 / 0.55), 0 0 40px oklch(0.82 0.22 148 / 0.4);
+      transform: scale(1);
+    }
+    50% {
+      box-shadow: 0 0 0 24px oklch(0.82 0.22 148 / 0), 0 0 60px oklch(0.82 0.22 148 / 0.55);
+      transform: scale(1.02);
+    }
+  }
+  .animate-pulse-glow {
+    animation: pulse-glow 1.6s ease-in-out infinite;
+  }
+
+  @keyframes ring-progress {
+    from { stroke-dashoffset: var(--ring-from); }
+    to { stroke-dashoffset: var(--ring-to); }
+  }
+}
