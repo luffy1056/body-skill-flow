@@ -1,7 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Flame, Play, Quote, Zap } from "lucide-react";
+import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { SkillCard, type Skill } from "@/components/SkillCard";
+import { freeSkills } from "@/data/skills";
+import { getProfile, getPrimarySkill, type UserProfile } from "@/lib/profile";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -22,7 +25,7 @@ export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
-const skills: Skill[] = [
+const defaultSkills: Skill[] = [
   { name: "Muscle Up", level: "Intermediate", progress: 68, emoji: "💪" },
   { name: "Planche", level: "Beginner", progress: 24, emoji: "🤸" },
   { name: "Front Lever", level: "Intermediate", progress: 52, emoji: "🦅" },
@@ -30,8 +33,53 @@ const skills: Skill[] = [
 ];
 
 function HomePage() {
-  const userName = "Alex";
+  const navigate = useNavigate();
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    const p = getProfile();
+    if (!p) {
+      navigate({ to: "/onboarding" });
+      return;
+    }
+    setProfile(p);
+    setHydrated(true);
+  }, [navigate]);
+
+  if (!hydrated || !profile) {
+    return (
+      <AppShell>
+        <div className="flex min-h-screen items-center justify-center px-6">
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-muted border-t-primary" />
+        </div>
+      </AppShell>
+    );
+  }
+
+  const userName = profile.name;
   const streak = 12;
+  const primarySkill = getPrimarySkill(profile.primarySkill);
+
+  // Featured skills: primary first, then a few others
+  const featuredSkills: Skill[] = [
+    {
+      name: primarySkill.name,
+      level: primarySkill.difficulty,
+      progress: Math.round((primarySkill.currentLevel / primarySkill.levels.length) * 100),
+      emoji: primarySkill.emoji,
+    },
+    ...freeSkills
+      .filter((s) => s.slug !== primarySkill.slug)
+      .slice(0, 3)
+      .map((s) => ({
+        name: s.name,
+        level: s.difficulty,
+        progress: Math.round((s.currentLevel / s.levels.length) * 100),
+        emoji: s.emoji,
+      })),
+  ];
+  const skillsToShow = featuredSkills.length ? featuredSkills : defaultSkills;
 
   return (
     <AppShell>
@@ -49,6 +97,9 @@ function HomePage() {
           <h1 className="mt-2 text-4xl font-black leading-tight tracking-tight text-foreground">
             Hey, {userName}<span className="text-primary">.</span>
           </h1>
+          <p className="mt-1 text-sm font-semibold text-muted-foreground">
+            Ready for today's <span className="text-foreground">{primarySkill.name}</span> session?
+          </p>
           <div className="mt-4 flex items-start gap-2 rounded-2xl border border-border bg-card/60 p-4 backdrop-blur">
             <Quote className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
             <p className="text-sm italic leading-relaxed text-muted-foreground">
@@ -111,7 +162,7 @@ function HomePage() {
             <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary">
               <Zap className="h-3 w-3" /> Pull Focus
             </span>
-            <h3 className="mt-3 text-2xl font-black text-foreground">Muscle Up Progression</h3>
+            <h3 className="mt-3 text-2xl font-black text-foreground">{primarySkill.name} Progression</h3>
             <div className="mt-4 grid grid-cols-3 gap-3">
               <Stat label="Sets" value="4" />
               <Stat label="Reps" value="6" />
@@ -119,7 +170,7 @@ function HomePage() {
             </div>
             <Link
               to="/workout"
-              search={{ slug: "muscle-up", level: 5 }}
+              search={{ slug: primarySkill.slug, level: primarySkill.currentLevel }}
               className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-4 font-bold text-primary-foreground shadow-[var(--shadow-glow)] transition-all hover:bg-primary-glow active:scale-[0.98]"
             >
               <Play className="h-5 w-5 fill-current" />
@@ -138,7 +189,7 @@ function HomePage() {
           </button>
         </div>
         <div className="space-y-3">
-          {skills.map((skill) => (
+          {skillsToShow.map((skill) => (
             <SkillCard key={skill.name} skill={skill} />
           ))}
         </div>
