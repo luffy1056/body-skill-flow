@@ -9,9 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WorkoutsRouteImport } from './routes/workouts'
 import { Route as SkillsRouteImport } from './routes/skills'
 import { Route as IndexRouteImport } from './routes/index'
 
+const WorkoutsRoute = WorkoutsRouteImport.update({
+  id: '/workouts',
+  path: '/workouts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SkillsRoute = SkillsRouteImport.update({
   id: '/skills',
   path: '/skills',
@@ -26,31 +32,42 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/skills': typeof SkillsRoute
+  '/workouts': typeof WorkoutsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/skills': typeof SkillsRoute
+  '/workouts': typeof WorkoutsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/skills': typeof SkillsRoute
+  '/workouts': typeof WorkoutsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/skills'
+  fullPaths: '/' | '/skills' | '/workouts'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/skills'
-  id: '__root__' | '/' | '/skills'
+  to: '/' | '/skills' | '/workouts'
+  id: '__root__' | '/' | '/skills' | '/workouts'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   SkillsRoute: typeof SkillsRoute
+  WorkoutsRoute: typeof WorkoutsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/workouts': {
+      id: '/workouts'
+      path: '/workouts'
+      fullPath: '/workouts'
+      preLoaderRoute: typeof WorkoutsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/skills': {
       id: '/skills'
       path: '/skills'
@@ -71,6 +88,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   SkillsRoute: SkillsRoute,
+  WorkoutsRoute: WorkoutsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
