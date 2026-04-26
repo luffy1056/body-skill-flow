@@ -109,15 +109,19 @@ function ProfilePage() {
 
   const handleShare = async () => {
     const text = `I'm training calisthenics on SkillFlow! 🔥 ${skillsUnlocked} skills unlocked. Join me!`;
+    if (typeof navigator === "undefined") return;
+    const nav = navigator as Navigator & {
+      share?: (data: { title?: string; text?: string; url?: string }) => Promise<void>;
+    };
     try {
-      if (typeof navigator !== "undefined" && "share" in navigator) {
-        await navigator.share({ title: "SkillFlow Progress", text });
+      if (nav.share) {
+        await nav.share({ title: "SkillFlow Progress", text });
       } else {
-        await navigator.clipboard.writeText(text);
+        await nav.clipboard.writeText(text);
         toast.success("Progress copied to clipboard");
       }
     } catch {
-      // user cancelled
+      // user cancelled or unsupported
     }
   };
 
