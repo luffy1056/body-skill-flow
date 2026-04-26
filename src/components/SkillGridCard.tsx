@@ -74,7 +74,11 @@ export function SkillGridCard({ skill }: { skill: SkillData }) {
   );
 
   if (skill.locked) {
-    return <div className="block">{inner}</div>;
+    return (
+      <Link to="/pro" className="block">
+        {inner}
+      </Link>
+    );
   }
 
   return (
