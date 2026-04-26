@@ -16,9 +16,11 @@ import { Route as ProgressRouteImport } from './routes/progress'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ProRouteImport } from './routes/pro'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as CoachRouteImport } from './routes/coach'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WorkoutSummaryRouteImport } from './routes/workout.summary'
 import { Route as SkillsSlugRouteImport } from './routes/skills.$slug'
+import { Route as ApiPublicCoachRouteImport } from './routes/api/public/coach'
 
 const WorkoutsRoute = WorkoutsRouteImport.update({
   id: '/workouts',
@@ -55,6 +57,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CoachRoute = CoachRouteImport.update({
+  id: '/coach',
+  path: '/coach',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -70,9 +77,15 @@ const SkillsSlugRoute = SkillsSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => SkillsRoute,
 } as any)
+const ApiPublicCoachRoute = ApiPublicCoachRouteImport.update({
+  id: '/api/public/coach',
+  path: '/api/public/coach',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/coach': typeof CoachRoute
   '/onboarding': typeof OnboardingRoute
   '/pro': typeof ProRoute
   '/profile': typeof ProfileRoute
@@ -82,9 +95,11 @@ export interface FileRoutesByFullPath {
   '/workouts': typeof WorkoutsRoute
   '/skills/$slug': typeof SkillsSlugRoute
   '/workout/summary': typeof WorkoutSummaryRoute
+  '/api/public/coach': typeof ApiPublicCoachRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/coach': typeof CoachRoute
   '/onboarding': typeof OnboardingRoute
   '/pro': typeof ProRoute
   '/profile': typeof ProfileRoute
@@ -94,10 +109,12 @@ export interface FileRoutesByTo {
   '/workouts': typeof WorkoutsRoute
   '/skills/$slug': typeof SkillsSlugRoute
   '/workout/summary': typeof WorkoutSummaryRoute
+  '/api/public/coach': typeof ApiPublicCoachRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/coach': typeof CoachRoute
   '/onboarding': typeof OnboardingRoute
   '/pro': typeof ProRoute
   '/profile': typeof ProfileRoute
@@ -107,11 +124,13 @@ export interface FileRoutesById {
   '/workouts': typeof WorkoutsRoute
   '/skills/$slug': typeof SkillsSlugRoute
   '/workout/summary': typeof WorkoutSummaryRoute
+  '/api/public/coach': typeof ApiPublicCoachRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/coach'
     | '/onboarding'
     | '/pro'
     | '/profile'
@@ -121,9 +140,11 @@ export interface FileRouteTypes {
     | '/workouts'
     | '/skills/$slug'
     | '/workout/summary'
+    | '/api/public/coach'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/coach'
     | '/onboarding'
     | '/pro'
     | '/profile'
@@ -133,9 +154,11 @@ export interface FileRouteTypes {
     | '/workouts'
     | '/skills/$slug'
     | '/workout/summary'
+    | '/api/public/coach'
   id:
     | '__root__'
     | '/'
+    | '/coach'
     | '/onboarding'
     | '/pro'
     | '/profile'
@@ -145,10 +168,12 @@ export interface FileRouteTypes {
     | '/workouts'
     | '/skills/$slug'
     | '/workout/summary'
+    | '/api/public/coach'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CoachRoute: typeof CoachRoute
   OnboardingRoute: typeof OnboardingRoute
   ProRoute: typeof ProRoute
   ProfileRoute: typeof ProfileRoute
@@ -156,6 +181,7 @@ export interface RootRouteChildren {
   SkillsRoute: typeof SkillsRouteWithChildren
   WorkoutRoute: typeof WorkoutRouteWithChildren
   WorkoutsRoute: typeof WorkoutsRoute
+  ApiPublicCoachRoute: typeof ApiPublicCoachRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -209,6 +235,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/coach': {
+      id: '/coach'
+      path: '/coach'
+      fullPath: '/coach'
+      preLoaderRoute: typeof CoachRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -229,6 +262,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/skills/$slug'
       preLoaderRoute: typeof SkillsSlugRouteImport
       parentRoute: typeof SkillsRoute
+    }
+    '/api/public/coach': {
+      id: '/api/public/coach'
+      path: '/api/public/coach'
+      fullPath: '/api/public/coach'
+      preLoaderRoute: typeof ApiPublicCoachRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -257,6 +297,7 @@ const WorkoutRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CoachRoute: CoachRoute,
   OnboardingRoute: OnboardingRoute,
   ProRoute: ProRoute,
   ProfileRoute: ProfileRoute,
@@ -264,6 +305,7 @@ const rootRouteChildren: RootRouteChildren = {
   SkillsRoute: SkillsRouteWithChildren,
   WorkoutRoute: WorkoutRouteWithChildren,
   WorkoutsRoute: WorkoutsRoute,
+  ApiPublicCoachRoute: ApiPublicCoachRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
