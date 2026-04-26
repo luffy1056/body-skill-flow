@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Sparkles, Crown } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { SkillGridCard } from "@/components/SkillGridCard";
+import { TodayFab } from "@/components/TodayFab";
 import { freeSkills, proSkills } from "@/data/skills";
 
 export const Route = createFileRoute("/skills")({
@@ -84,6 +85,7 @@ function SkillsPage() {
           Upgrade to Pro
         </button>
       </section>
+      <TodayFab />
     </AppShell>
   );
 }
