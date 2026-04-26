@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Flame, Play, Quote, Zap } from "lucide-react";
+import { Flame, Play, Quote, Sparkles, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { SkillCard, type Skill } from "@/components/SkillCard";
@@ -193,6 +193,31 @@ function HomePage() {
             <SkillCard key={skill.name} skill={skill} />
           ))}
         </div>
+      </section>
+
+      {/* AI Coach entry */}
+      <section className="px-6 pt-8">
+        <Link
+          to="/coach"
+          className="group flex items-center gap-4 overflow-hidden rounded-2xl border border-primary/30 p-4 transition-all hover:border-primary/60 active:scale-[0.99]"
+          style={{ background: "var(--gradient-hero)" }}
+        >
+          <div
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl shadow-[var(--shadow-glow)]"
+            style={{ background: "var(--gradient-primary)" }}
+          >
+            <Sparkles className="h-5 w-5 text-primary-foreground" strokeWidth={2.5} />
+          </div>
+          <div className="flex-1">
+            <div className="text-sm font-black tracking-tight">Ask AI Coach</div>
+            <div className="text-xs text-muted-foreground">
+              Personalized training advice, anytime.
+            </div>
+          </div>
+          <span className="rounded-full bg-primary/15 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-primary">
+            New
+          </span>
+        </Link>
       </section>
     </AppShell>
   );
