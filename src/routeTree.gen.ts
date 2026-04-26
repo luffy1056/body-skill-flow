@@ -14,6 +14,7 @@ import { Route as WorkoutRouteImport } from './routes/workout'
 import { Route as SkillsRouteImport } from './routes/skills'
 import { Route as ProgressRouteImport } from './routes/progress'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as ProRouteImport } from './routes/pro'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WorkoutSummaryRouteImport } from './routes/workout.summary'
@@ -44,6 +45,11 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProRoute = ProRouteImport.update({
+  id: '/pro',
+  path: '/pro',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -68,6 +74,7 @@ const SkillsSlugRoute = SkillsSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/onboarding': typeof OnboardingRoute
+  '/pro': typeof ProRoute
   '/profile': typeof ProfileRoute
   '/progress': typeof ProgressRoute
   '/skills': typeof SkillsRouteWithChildren
@@ -79,6 +86,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/onboarding': typeof OnboardingRoute
+  '/pro': typeof ProRoute
   '/profile': typeof ProfileRoute
   '/progress': typeof ProgressRoute
   '/skills': typeof SkillsRouteWithChildren
@@ -91,6 +99,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/onboarding': typeof OnboardingRoute
+  '/pro': typeof ProRoute
   '/profile': typeof ProfileRoute
   '/progress': typeof ProgressRoute
   '/skills': typeof SkillsRouteWithChildren
@@ -104,6 +113,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/onboarding'
+    | '/pro'
     | '/profile'
     | '/progress'
     | '/skills'
@@ -115,6 +125,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/onboarding'
+    | '/pro'
     | '/profile'
     | '/progress'
     | '/skills'
@@ -126,6 +137,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/onboarding'
+    | '/pro'
     | '/profile'
     | '/progress'
     | '/skills'
@@ -138,6 +150,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   OnboardingRoute: typeof OnboardingRoute
+  ProRoute: typeof ProRoute
   ProfileRoute: typeof ProfileRoute
   ProgressRoute: typeof ProgressRoute
   SkillsRoute: typeof SkillsRouteWithChildren
@@ -180,6 +193,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pro': {
+      id: '/pro'
+      path: '/pro'
+      fullPath: '/pro'
+      preLoaderRoute: typeof ProRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -238,6 +258,7 @@ const WorkoutRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   OnboardingRoute: OnboardingRoute,
+  ProRoute: ProRoute,
   ProfileRoute: ProfileRoute,
   ProgressRoute: ProgressRoute,
   SkillsRoute: SkillsRouteWithChildren,
