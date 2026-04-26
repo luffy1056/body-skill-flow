@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Lock } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
@@ -14,13 +15,18 @@ export function SkillGridCard({ skill }: { skill: SkillData }) {
   const progressPct = skill.locked
     ? 0
     : Math.round((skill.currentLevel / totalLevels) * 100);
+  const [animVal, setAnimVal] = useState(0);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setAnimVal(progressPct));
+    return () => cancelAnimationFrame(id);
+  }, [progressPct]);
 
   const inner = (
     <article
-      className={`group relative flex h-full flex-col gap-3 overflow-hidden rounded-2xl border border-border bg-card p-4 text-left shadow-[var(--shadow-card)] transition-all ${
+      className={`group relative flex h-full flex-col gap-3 overflow-hidden rounded-2xl border border-border bg-card p-4 text-left shadow-[var(--shadow-card)] transition-all duration-200 ${
         skill.locked
           ? "cursor-not-allowed"
-          : "hover:-translate-y-0.5 hover:border-primary/40 hover:bg-card-elevated active:scale-[0.98]"
+          : "tap-scale hover:border-primary/40 hover:bg-card-elevated"
       }`}
     >
       <div className="flex items-start justify-between">
@@ -44,7 +50,10 @@ export function SkillGridCard({ skill }: { skill: SkillData }) {
       </div>
 
       <div className="mt-auto">
-        <Progress value={progressPct} className="h-1 bg-secondary" />
+        <Progress
+          value={animVal}
+          className="h-1 bg-secondary [&>*]:transition-transform [&>*]:duration-700 [&>*]:ease-out"
+        />
         <div className="mt-1.5 flex items-center justify-between text-[10px] font-bold uppercase tracking-wider">
           <span className="text-muted-foreground">
             {skill.locked ? "—" : `Lvl ${skill.currentLevel}/${totalLevels}`}

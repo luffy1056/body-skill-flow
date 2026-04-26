@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import { ChevronRight } from "lucide-react";
 
@@ -9,10 +10,15 @@ export interface Skill {
 }
 
 export function SkillCard({ skill }: { skill: Skill }) {
+  const [val, setVal] = useState(0);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setVal(skill.progress));
+    return () => cancelAnimationFrame(id);
+  }, [skill.progress]);
   return (
     <button
       type="button"
-      className="group flex w-full items-center gap-4 rounded-2xl border border-border bg-card p-4 text-left shadow-[var(--shadow-card)] transition-all hover:border-primary/40 hover:bg-card-elevated active:scale-[0.98]"
+      className="group tap-scale flex w-full items-center gap-4 rounded-2xl border border-border bg-card p-4 text-left shadow-[var(--shadow-card)] hover:border-primary/40 hover:bg-card-elevated"
     >
       <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-secondary text-2xl">
         <span aria-hidden>{skill.emoji}</span>
@@ -25,7 +31,10 @@ export function SkillCard({ skill }: { skill: Skill }) {
           </span>
         </div>
         <div className="mt-2 flex items-center gap-2">
-          <Progress value={skill.progress} className="h-1.5 flex-1 bg-secondary" />
+          <Progress
+            value={val}
+            className="h-1.5 flex-1 bg-secondary [&>*]:transition-transform [&>*]:duration-700 [&>*]:ease-out"
+          />
           <span className="text-xs font-semibold tabular-nums text-muted-foreground">
             {skill.progress}%
           </span>

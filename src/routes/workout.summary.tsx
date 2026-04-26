@@ -1,7 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Clock, Dumbbell, Flame, Repeat, Trophy } from "lucide-react";
+import { Clock, Dumbbell, Flame, Loader2, Repeat, Trophy } from "lucide-react";
+import { useState } from "react";
 import { z } from "zod";
 import { getSkillBySlug } from "@/data/skills";
+import { toastWorkoutLogged, toastStreakExtended } from "@/lib/toasts";
 
 const searchSchema = z.object({
   slug: z.string(),
@@ -42,6 +44,22 @@ function SummaryPage() {
   const navigate = useNavigate();
   const skill = getSkillBySlug(search.slug);
   const quote = QUOTES[search.sets % QUOTES.length];
+  const [logging, setLogging] = useState(false);
+  const [logged, setLogged] = useState(false);
+
+  const handleLog = async () => {
+    if (logging || logged) return;
+    setLogging(true);
+    // Simulate persistence
+    await new Promise((r) => setTimeout(r, 600));
+    setLogged(true);
+    setLogging(false);
+    toastWorkoutLogged(
+      skill ? `${skill.name} · ${formatDuration(search.seconds)}` : undefined,
+    );
+    setTimeout(() => toastStreakExtended(1), 500);
+    setTimeout(() => navigate({ to: "/" }), 1000);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -108,15 +126,25 @@ function SummaryPage() {
         <div className="mt-auto pt-8">
           <button
             type="button"
-            onClick={() => navigate({ to: "/" })}
-            className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary text-base font-bold text-primary-foreground shadow-[var(--shadow-glow)] transition-transform active:scale-[0.98]"
+            onClick={handleLog}
+            disabled={logging || logged}
+            className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-primary text-base font-bold text-primary-foreground shadow-[var(--shadow-glow)] transition-all active:scale-[0.98] hover:bg-primary-glow disabled:cursor-not-allowed disabled:opacity-80"
           >
-            Log Workout
+            {logging ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                Logging…
+              </>
+            ) : logged ? (
+              "Logged ✓"
+            ) : (
+              "Log Workout"
+            )}
           </button>
           <Link
             to="/skills/$slug"
             params={{ slug: search.slug }}
-            className="mt-3 flex h-12 w-full items-center justify-center rounded-2xl border border-border bg-card text-sm font-bold text-foreground"
+            className="mt-3 flex h-12 w-full items-center justify-center rounded-2xl border border-border bg-card text-sm font-bold text-foreground transition-colors hover:bg-card-elevated"
           >
             Back to Skill
           </Link>

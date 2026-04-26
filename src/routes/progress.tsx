@@ -19,7 +19,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { Trophy, Flame, Clock, Calendar } from "lucide-react";
+import { Trophy, Flame, Clock, Calendar, Activity, Sparkles, Play } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { TodayFab } from "@/components/TodayFab";
 import { freeSkills } from "@/data/skills";
 
 export const Route = createFileRoute("/progress")({
@@ -93,24 +95,9 @@ function buildSeries(slug: string) {
   return points;
 }
 
-const personalBests = [
-  { slug: "muscle-up", record: "Level 4 · 8 reps", date: "Apr 18" },
-  { slug: "planche", record: "Tuck Planche · 22s hold", date: "Apr 11" },
-  { slug: "front-lever", record: "Adv Tuck · 18s hold", date: "Apr 20" },
-  { slug: "back-lever", record: "Straddle · 14s hold", date: "Apr 14" },
-  { slug: "pistol-squat", record: "Full · 12 reps", date: "Apr 22" },
-  { slug: "handstand-push-up", record: "Wall HSPU · 6 reps", date: "Apr 09" },
-];
-
-const workoutHistory = [
-  { date: "Apr 24", skill: "Front Lever", duration: "32 min", sets: 4 },
-  { date: "Apr 23", skill: "Muscle Up", duration: "41 min", sets: 5 },
-  { date: "Apr 22", skill: "Pistol Squat", duration: "28 min", sets: 4 },
-  { date: "Apr 20", skill: "Planche", duration: "36 min", sets: 4 },
-  { date: "Apr 18", skill: "Muscle Up", duration: "44 min", sets: 5 },
-  { date: "Apr 17", skill: "Back Lever", duration: "30 min", sets: 4 },
-  { date: "Apr 15", skill: "V-Sit", duration: "22 min", sets: 3 },
-];
+// No workouts logged yet — fresh user start
+const personalBests: { slug: string; record: string; date: string }[] = [];
+const workoutHistory: { date: string; skill: string; duration: string; sets: number }[] = [];
 
 function getIntensityClass(intensity: number) {
   switch (intensity) {
@@ -133,25 +120,38 @@ function ProgressPage() {
   const [selectedSkill, setSelectedSkill] = useState<string>(freeSkills[0].slug);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
-  const heatmap = useMemo(() => (mounted ? buildHeatmap(16) : []), [mounted]);
+  const hasData = workoutHistory.length > 0;
+  const heatmap = useMemo(
+    () => (mounted && hasData ? buildHeatmap(16) : buildEmptyHeatmap(16)),
+    [mounted, hasData],
+  );
   const series = useMemo(
-    () => (mounted ? buildSeries(selectedSkill) : []),
-    [mounted, selectedSkill],
+    () => (mounted && hasData ? buildSeries(selectedSkill) : []),
+    [mounted, selectedSkill, hasData],
   );
 
-  const totalSessions = heatmap.flat().filter((c) => c.intensity > 0).length;
-  const totalMinutes = heatmap.flat().reduce((sum, c) => sum + c.minutes, 0);
-  const currentStreak = (() => {
-    const flat = heatmap.flat();
-    let streak = 0;
-    for (let i = flat.length - 1; i >= 0; i--) {
-      if (flat[i].intensity > 0) streak++;
-      else break;
-    }
-    return streak;
-  })();
+  const totalSessions = workoutHistory.length;
+  const totalMinutes = 0;
+  const currentStreak = 0;
 
   const skill = freeSkills.find((s) => s.slug === selectedSkill);
+
+  if (!hasData) {
+    return (
+      <AppShell>
+        <div className="p-5 space-y-6">
+          <header>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+              Your journey
+            </p>
+            <h1 className="mt-1 text-3xl font-black tracking-tight">Progress</h1>
+          </header>
+          <ProgressEmptyState />
+        </div>
+        <TodayFab />
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell>
@@ -379,6 +379,90 @@ function ProgressPage() {
           </div>
         </section>
       </div>
+      <TodayFab />
     </AppShell>
+  );
+}
+
+function buildEmptyHeatmap(weeks: number): HeatCell[][] {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const totalDays = weeks * 7;
+  const start = new Date(today);
+  start.setDate(today.getDate() - (totalDays - 1));
+  const cells: HeatCell[] = [];
+  for (let i = 0; i < totalDays; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    cells.push({ date: d, intensity: 0, minutes: 0 });
+  }
+  const columns: HeatCell[][] = [];
+  for (let c = 0; c < weeks; c++) {
+    columns.push(cells.slice(c * 7, c * 7 + 7));
+  }
+  return columns;
+}
+
+function ProgressEmptyState() {
+  return (
+    <div className="flex flex-col items-center text-center pt-6 animate-fade-in">
+      {/* Illustration */}
+      <div className="relative mb-6 h-44 w-44">
+        <div
+          aria-hidden
+          className="absolute inset-0 rounded-full opacity-30 blur-3xl"
+          style={{ background: "var(--gradient-primary)" }}
+        />
+        <div className="relative h-full w-full rounded-full border border-primary/30 bg-card grid place-content-center shadow-[var(--shadow-glow)]">
+          <div className="grid grid-cols-7 gap-1.5">
+            {Array.from({ length: 49 }).map((_, i) => (
+              <span
+                key={i}
+                className={`h-3 w-3 rounded-[3px] ${
+                  i === 24 || i === 17 || i === 31 || i === 32
+                    ? "bg-primary/70"
+                    : "bg-muted/40"
+                }`}
+              />
+            ))}
+          </div>
+          <div className="absolute -right-2 -top-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-[var(--shadow-glow)] animate-pulse-glow">
+            <Activity className="h-6 w-6" strokeWidth={2.5} />
+          </div>
+        </div>
+      </div>
+
+      <h2 className="text-xl font-black tracking-tight">No workouts yet</h2>
+      <p className="mt-2 max-w-xs text-sm text-muted-foreground leading-relaxed">
+        Complete your first session to start building your streak, heatmap, and personal bests.
+      </p>
+
+      <Link
+        to="/workouts"
+        className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-primary px-6 py-3.5 text-sm font-bold text-primary-foreground shadow-[var(--shadow-glow)] transition-transform active:scale-95 hover:bg-primary-glow"
+      >
+        <Play className="h-4 w-4 fill-current" />
+        Start your first workout
+      </Link>
+
+      <div className="mt-8 grid w-full grid-cols-3 gap-3">
+        <EmptyHint icon={<Flame className="h-4 w-4" />} label="Streak" />
+        <EmptyHint icon={<Trophy className="h-4 w-4" />} label="Records" />
+        <EmptyHint icon={<Sparkles className="h-4 w-4" />} label="Insights" />
+      </div>
+    </div>
+  );
+}
+
+function EmptyHint({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return (
+    <div className="rounded-2xl border border-border/60 bg-card/60 p-3 text-center">
+      <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-primary/15 text-primary">
+        {icon}
+      </div>
+      <p className="mt-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+        {label}
+      </p>
+    </div>
   );
 }
