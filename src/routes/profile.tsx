@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { Card } from "@/components/ui/card";
-import { Crown, ChevronRight, Settings, Bell, HelpCircle, LogOut } from "lucide-react";
+import { Crown, ChevronRight, Settings, Bell, HelpCircle, LogOut, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -46,6 +46,24 @@ function ProfilePage() {
               <ChevronRight className="h-5 w-5 text-muted-foreground" />
             </div>
           </Card>
+        </Link>
+
+        <Link to="/coach" className="mt-3 block">
+          <div className="flex items-center gap-3 rounded-xl border border-border bg-card p-3.5 transition hover:bg-card-elevated">
+            <div
+              className="flex h-9 w-9 items-center justify-center rounded-lg"
+              style={{ background: "var(--gradient-primary)" }}
+            >
+              <Sparkles className="h-4 w-4 text-primary-foreground" strokeWidth={2.5} />
+            </div>
+            <div className="flex-1">
+              <div className="text-sm font-semibold">AI Coach</div>
+              <div className="text-[11px] text-muted-foreground">
+                Chat about training & progress
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground" />
+          </div>
         </Link>
 
         <div className="mt-6 space-y-2">
