@@ -176,4 +176,22 @@
     from { stroke-dashoffset: var(--ring-from); }
     to { stroke-dashoffset: var(--ring-to); }
   }
+
+  @keyframes shimmer-cta {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .animate-shimmer-cta {
+    background-size: 200% 200%;
+    animation: shimmer-cta 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-cta {
+    0%, 100% { box-shadow: 0 0 0 0 oklch(0.85 0.18 95 / 0.55), 0 10px 40px oklch(0.85 0.18 95 / 0.35); }
+    50% { box-shadow: 0 0 0 14px oklch(0.85 0.18 95 / 0), 0 14px 50px oklch(0.85 0.18 95 / 0.5); }
+  }
+  .animate-pulse-cta {
+    animation: pulse-cta 2s ease-in-out infinite;
+  }
 }
