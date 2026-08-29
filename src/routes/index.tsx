@@ -72,7 +72,6 @@ function HomePage() {
   }
 
   const userName = profile.name;
-  const streak = 12;
   const primarySkill = getPrimarySkill(profile.primarySkill);
 
   // Featured skills: primary first, then a few others
@@ -160,7 +159,7 @@ function HomePage() {
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-bold text-foreground">Today's Workout</h2>
           <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Day 13
+            Day {totalDays + 1}
           </span>
         </div>
         <article
