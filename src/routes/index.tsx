@@ -142,11 +142,11 @@ function HomePage() {
             </div>
           </div>
           <div className="flex gap-1">
-            {Array.from({ length: 7 }).map((_, i) => (
+            {week.map((trained, i) => (
               <div
                 key={i}
                 className={`h-8 w-1.5 rounded-full ${
-                  i < 5 ? "bg-primary" : "bg-secondary"
+                  trained ? "bg-primary" : "bg-secondary"
                 }`}
               />
             ))}

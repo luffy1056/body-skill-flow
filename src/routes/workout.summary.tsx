@@ -50,8 +50,8 @@ function SummaryPage() {
   const handleLog = async () => {
     if (logging || logged) return;
     setLogging(true);
-    // Simulate persistence
-    await new Promise((r) => setTimeout(r, 600));
+    recordCompletion();
+    await new Promise((r) => setTimeout(r, 300));
     setLogged(true);
     setLogging(false);
     toastWorkoutLogged(
