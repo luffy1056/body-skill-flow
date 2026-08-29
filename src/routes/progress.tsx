@@ -171,19 +171,25 @@ function ProgressPage() {
   const [selectedSkill, setSelectedSkill] = useState<string>(freeSkills[0].slug);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
-  const hasData = workoutHistory.length > 0;
+
+  const sessions = useMemo(() => (mounted ? getSessions() : []), [mounted]);
+  const hasData = sessions.length > 0;
   const heatmap = useMemo(
-    () => (mounted && hasData ? buildHeatmap(16) : buildEmptyHeatmap(16)),
-    [mounted, hasData],
+    () => (mounted && hasData ? buildHeatmap(sessions, 16) : buildEmptyHeatmap(16)),
+    [mounted, hasData, sessions],
   );
   const series = useMemo(
-    () => (mounted && hasData ? buildSeries(selectedSkill) : []),
-    [mounted, selectedSkill, hasData],
+    () => (mounted && hasData ? buildSeries(sessions, selectedSkill) : []),
+    [mounted, selectedSkill, hasData, sessions],
   );
+  const personalBests = useMemo(() => buildPersonalBests(sessions), [sessions]);
+  const workoutHistory = useMemo(() => buildHistory(sessions), [sessions]);
 
-  const totalSessions = workoutHistory.length;
-  const totalMinutes = 0;
-  const currentStreak = 0;
+  const totalSessions = sessions.length;
+  const totalMinutes = Math.round(
+    sessions.reduce((sum, s) => sum + s.seconds, 0) / 60,
+  );
+  const currentStreak = mounted ? getStreak() : 0;
 
   const skill = freeSkills.find((s) => s.slug === selectedSkill);
 
