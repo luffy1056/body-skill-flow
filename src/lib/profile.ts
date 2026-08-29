@@ -90,3 +90,58 @@ export function clearProfile() {
 export function getPrimarySkill(slug: string) {
   return freeSkills.find((s) => s.slug === slug) ?? freeSkills[0];
 }
+
+// --- Workout completions (streak tracking) ---
+
+const COMPLETIONS_KEY = "skillflow.completions.v1";
+
+function dateKey(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+export function getCompletions(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(COMPLETIONS_KEY);
+    const arr = raw ? (JSON.parse(raw) as string[]) : [];
+    return Array.isArray(arr) ? arr.filter((d) => typeof d === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+export function recordCompletion(date: Date = new Date()) {
+  if (typeof window === "undefined") return;
+  const key = dateKey(date);
+  const set = new Set(getCompletions());
+  set.add(key);
+  window.localStorage.setItem(COMPLETIONS_KEY, JSON.stringify([...set].sort()));
+}
+
+/** Consecutive-day streak ending today (or yesterday if today not yet trained). */
+export function getStreak(): number {
+  const set = new Set(getCompletions());
+  let streak = 0;
+  const d = new Date();
+  if (!set.has(dateKey(d))) d.setDate(d.getDate() - 1); // today not done yet — count from yesterday
+  while (set.has(dateKey(d))) {
+    streak++;
+    d.setDate(d.getDate() - 1);
+  }
+  return streak;
+}
+
+/** Total distinct days trained. */
+export function getTotalDays(): number {
+  return new Set(getCompletions()).size;
+}
+
+/** Boolean map of the last 7 days (oldest first): true = trained that day. */
+export function getLast7Days(): boolean[] {
+  const set = new Set(getCompletions());
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    return set.has(dateKey(d));
+  });
+}
