@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { z } from "zod";
 import { getSkillBySlug } from "@/data/skills";
+import { recordCompletion } from "@/lib/profile";
 
 const searchSchema = z.object({
   slug: z.string(),
@@ -193,6 +194,7 @@ function WorkoutPlayer() {
   }
 
   function finishWorkout() {
+    recordCompletion();
     const elapsed = Math.round((Date.now() - totalsRef.current.sessionStart) / 1000);
     navigate({
       to: "/workout/summary",
