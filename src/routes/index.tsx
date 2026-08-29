@@ -4,7 +4,14 @@ import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { SkillCard, type Skill } from "@/components/SkillCard";
 import { freeSkills } from "@/data/skills";
-import { getProfile, getPrimarySkill, type UserProfile } from "@/lib/profile";
+import {
+  getLast7Days,
+  getProfile,
+  getPrimarySkill,
+  getStreak,
+  getTotalDays,
+  type UserProfile,
+} from "@/lib/profile";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -37,6 +44,10 @@ function HomePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
+  const [streak, setStreak] = useState(0);
+  const [totalDays, setTotalDays] = useState(0);
+  const [week, setWeek] = useState<boolean[]>(Array(7).fill(false));
+
   useEffect(() => {
     const p = getProfile();
     if (!p) {
@@ -44,6 +55,9 @@ function HomePage() {
       return;
     }
     setProfile(p);
+    setStreak(getStreak());
+    setTotalDays(getTotalDays());
+    setWeek(getLast7Days());
     setHydrated(true);
   }, [navigate]);
 
@@ -58,7 +72,6 @@ function HomePage() {
   }
 
   const userName = profile.name;
-  const streak = 12;
   const primarySkill = getPrimarySkill(profile.primarySkill);
 
   // Featured skills: primary first, then a few others
@@ -129,11 +142,11 @@ function HomePage() {
             </div>
           </div>
           <div className="flex gap-1">
-            {Array.from({ length: 7 }).map((_, i) => (
+            {week.map((trained, i) => (
               <div
                 key={i}
                 className={`h-8 w-1.5 rounded-full ${
-                  i < 5 ? "bg-primary" : "bg-secondary"
+                  trained ? "bg-primary" : "bg-secondary"
                 }`}
               />
             ))}
@@ -146,7 +159,7 @@ function HomePage() {
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-bold text-foreground">Today's Workout</h2>
           <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Day 13
+            Day {totalDays + 1}
           </span>
         </div>
         <article
