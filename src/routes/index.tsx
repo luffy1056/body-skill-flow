@@ -197,9 +197,12 @@ function HomePage() {
       <section className="px-6 pt-8">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-bold text-foreground">Your Skills</h2>
-          <button className="text-xs font-bold uppercase tracking-wider text-primary">
+          <Link
+            to="/skills"
+            className="text-xs font-bold uppercase tracking-wider text-primary"
+          >
             See all
-          </button>
+          </Link>
         </div>
         <div className="space-y-3">
           {skillsToShow.map((skill) => (
