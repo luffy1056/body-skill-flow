@@ -136,6 +136,41 @@ export function getTotalDays(): number {
   return new Set(getCompletions()).size;
 }
 
+// --- Workout sessions (progress charts) ---
+
+const SESSIONS_KEY = "skillflow.sessions.v1";
+
+export interface WorkoutSession {
+  date: string; // YYYY-MM-DD
+  slug: string;
+  level: number;
+  sets: number;
+  reps: number; // 0 for timed holds
+  seconds: number;
+}
+
+export function getSessions(): WorkoutSession[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(SESSIONS_KEY);
+    const arr = raw ? (JSON.parse(raw) as WorkoutSession[]) : [];
+    return Array.isArray(arr)
+      ? arr.filter((s) => s && typeof s.slug === "string" && typeof s.date === "string")
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+export function recordSession(session: Omit<WorkoutSession, "date">) {
+  if (typeof window === "undefined") return;
+  const sessions = getSessions();
+  sessions.push({ ...session, date: dateKey(new Date()) });
+  window.localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
+}
+
+export { dateKey };
+
 /** Boolean map of the last 7 days (oldest first): true = trained that day. */
 export function getLast7Days(): boolean[] {
   const set = new Set(getCompletions());
