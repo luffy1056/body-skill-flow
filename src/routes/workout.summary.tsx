@@ -3,6 +3,7 @@ import { Clock, Dumbbell, Flame, Loader2, Repeat, Trophy } from "lucide-react";
 import { useState } from "react";
 import { z } from "zod";
 import { getSkillBySlug } from "@/data/skills";
+import { recordCompletion } from "@/lib/profile";
 import { toastWorkoutLogged, toastStreakExtended } from "@/lib/toasts";
 
 const searchSchema = z.object({
