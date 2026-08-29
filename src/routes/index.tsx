@@ -4,7 +4,14 @@ import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { SkillCard, type Skill } from "@/components/SkillCard";
 import { freeSkills } from "@/data/skills";
-import { getProfile, getPrimarySkill, type UserProfile } from "@/lib/profile";
+import {
+  getLast7Days,
+  getProfile,
+  getPrimarySkill,
+  getStreak,
+  getTotalDays,
+  type UserProfile,
+} from "@/lib/profile";
 
 export const Route = createFileRoute("/")({
   head: () => ({
