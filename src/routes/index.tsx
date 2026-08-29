@@ -44,6 +44,10 @@ function HomePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [hydrated, setHydrated] = useState(false);
 
+  const [streak, setStreak] = useState(0);
+  const [totalDays, setTotalDays] = useState(0);
+  const [week, setWeek] = useState<boolean[]>(Array(7).fill(false));
+
   useEffect(() => {
     const p = getProfile();
     if (!p) {
@@ -51,6 +55,9 @@ function HomePage() {
       return;
     }
     setProfile(p);
+    setStreak(getStreak());
+    setTotalDays(getTotalDays());
+    setWeek(getLast7Days());
     setHydrated(true);
   }, [navigate]);
 
