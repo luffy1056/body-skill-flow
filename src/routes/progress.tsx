@@ -34,19 +34,35 @@ export const Route = createFileRoute("/progress")({
   component: ProgressPage,
 });
 
-// ---------- Mock data generators (deterministic) ----------
-function seededRandom(seed: number) {
-  let x = Math.sin(seed) * 10000;
-  return x - Math.floor(x);
-}
+// ---------- Real data builders (from logged sessions) ----------
+import {
+  dateKey,
+  getSessions,
+  getStreak,
+  type WorkoutSession,
+} from "@/lib/profile";
 
 type HeatCell = { date: Date; intensity: number; minutes: number };
 
-function buildHeatmap(weeks = 16): HeatCell[][] {
+function minutesForCell(sessions: WorkoutSession[], key: string): number {
+  return Math.round(
+    sessions
+      .filter((s) => s.date === key)
+      .reduce((sum, s) => sum + s.seconds, 0) / 60,
+  );
+}
+
+function intensityForMinutes(minutes: number): number {
+  if (minutes <= 0) return 0;
+  if (minutes < 10) return 1;
+  if (minutes < 20) return 2;
+  if (minutes < 35) return 3;
+  return 4;
+}
+
+function buildHeatmap(sessions: WorkoutSession[], weeks = 16): HeatCell[][] {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  // Align to Sunday of current week as the last column
-  const lastDayOfGrid = new Date(today);
   const totalDays = weeks * 7;
   const start = new Date(today);
   start.setDate(today.getDate() - (totalDays - 1));
@@ -55,19 +71,10 @@ function buildHeatmap(weeks = 16): HeatCell[][] {
   for (let i = 0; i < totalDays; i++) {
     const d = new Date(start);
     d.setDate(start.getDate() + i);
-    const r = seededRandom(d.getTime() / 86400000);
-    let intensity = 0;
-    if (r > 0.42) intensity = 1;
-    if (r > 0.62) intensity = 2;
-    if (r > 0.78) intensity = 3;
-    if (r > 0.9) intensity = 4;
-    // Keep future days empty
-    if (d > lastDayOfGrid) intensity = 0;
-    const minutes = intensity === 0 ? 0 : 15 + intensity * 12;
-    cells.push({ date: d, intensity, minutes });
+    const minutes = d > today ? 0 : minutesForCell(sessions, dateKey(d));
+    cells.push({ date: d, intensity: intensityForMinutes(minutes), minutes });
   }
 
-  // Group into columns of 7 (week columns)
   const columns: HeatCell[][] = [];
   for (let c = 0; c < weeks; c++) {
     columns.push(cells.slice(c * 7, c * 7 + 7));
@@ -75,19 +82,19 @@ function buildHeatmap(weeks = 16): HeatCell[][] {
   return columns;
 }
 
-function buildSeries(slug: string) {
+function buildSeries(sessions: WorkoutSession[], slug: string) {
   const points: { day: string; volume: number; sets: number; reps: number }[] = [];
   const today = new Date();
   for (let i = 29; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(today.getDate() - i);
-    const seed = d.getTime() / 86400000 + slug.length * 13;
-    const base = 6 + Math.floor(seededRandom(seed) * 8);
-    const sets = 3 + Math.floor(seededRandom(seed + 1) * 3);
-    const reps = base;
+    const key = dateKey(d);
+    const daySessions = sessions.filter((s) => s.slug === slug && s.date === key);
+    const sets = daySessions.reduce((sum, s) => sum + s.sets, 0);
+    const reps = daySessions.reduce((sum, s) => sum + s.reps, 0);
     points.push({
       day: d.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
-      volume: sets * reps,
+      volume: reps > 0 ? reps : sets,
       sets,
       reps,
     });
@@ -95,9 +102,55 @@ function buildSeries(slug: string) {
   return points;
 }
 
-// No workouts logged yet — fresh user start
-const personalBests: { slug: string; record: string; date: string }[] = [];
-const workoutHistory: { date: string; skill: string; duration: string; sets: number }[] = [];
+function buildPersonalBests(sessions: WorkoutSession[]) {
+  const bySkill = new Map<string, WorkoutSession[]>();
+  for (const s of sessions) {
+    const list = bySkill.get(s.slug) ?? [];
+    list.push(s);
+    bySkill.set(s.slug, list);
+  }
+  const bests: { slug: string; record: string; date: string }[] = [];
+  for (const [slug, list] of bySkill) {
+    const best = list.reduce((a, b) =>
+      b.reps > a.reps || (b.reps === a.reps && b.level > a.level) ? b : a,
+    );
+    bests.push({
+      slug,
+      record:
+        best.reps > 0
+          ? `Level ${best.level} · ${best.reps} reps`
+          : `Level ${best.level} · ${best.sets} holds`,
+      date: new Date(`${best.date}T00:00:00`).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+      }),
+    });
+  }
+  return bests;
+}
+
+function formatDurationShort(seconds: number): string {
+  const m = Math.round(seconds / 60);
+  return m < 1 ? "<1m" : `${m}m`;
+}
+
+type HistoryItem = { date: string; skill: string; duration: string; sets: number };
+
+function buildHistory(sessions: WorkoutSession[]): HistoryItem[] {
+  return [...sessions]
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 20)
+    .map((s) => {
+      const d = new Date(`${s.date}T00:00:00`);
+      const skill = freeSkills.find((f) => f.slug === s.slug);
+      return {
+        date: d.toLocaleDateString(undefined, { month: "short", day: "numeric" }),
+        skill: skill ? `${skill.emoji} ${skill.name}` : s.slug,
+        duration: formatDurationShort(s.seconds),
+        sets: s.sets,
+      };
+    });
+}
 
 function getIntensityClass(intensity: number) {
   switch (intensity) {
@@ -120,19 +173,25 @@ function ProgressPage() {
   const [selectedSkill, setSelectedSkill] = useState<string>(freeSkills[0].slug);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
-  const hasData = workoutHistory.length > 0;
+
+  const sessions = useMemo(() => (mounted ? getSessions() : []), [mounted]);
+  const hasData = sessions.length > 0;
   const heatmap = useMemo(
-    () => (mounted && hasData ? buildHeatmap(16) : buildEmptyHeatmap(16)),
-    [mounted, hasData],
+    () => (mounted && hasData ? buildHeatmap(sessions, 16) : buildEmptyHeatmap(16)),
+    [mounted, hasData, sessions],
   );
   const series = useMemo(
-    () => (mounted && hasData ? buildSeries(selectedSkill) : []),
-    [mounted, selectedSkill, hasData],
+    () => (mounted && hasData ? buildSeries(sessions, selectedSkill) : []),
+    [mounted, selectedSkill, hasData, sessions],
   );
+  const personalBests = useMemo(() => buildPersonalBests(sessions), [sessions]);
+  const workoutHistory = useMemo(() => buildHistory(sessions), [sessions]);
 
-  const totalSessions = workoutHistory.length;
-  const totalMinutes = 0;
-  const currentStreak = 0;
+  const totalSessions = sessions.length;
+  const totalMinutes = Math.round(
+    sessions.reduce((sum, s) => sum + s.seconds, 0) / 60,
+  );
+  const currentStreak = mounted ? getStreak() : 0;
 
   const skill = freeSkills.find((s) => s.slug === selectedSkill);
 
