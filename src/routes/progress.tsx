@@ -134,7 +134,9 @@ function formatDurationShort(seconds: number): string {
   return m < 1 ? "<1m" : `${m}m`;
 }
 
-function buildHistory(sessions: WorkoutSession[]) {
+type HistoryItem = { date: string; skill: string; duration: string; sets: number };
+
+function buildHistory(sessions: WorkoutSession[]): HistoryItem[] {
   return [...sessions]
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 20)
